@@ -1,118 +1,99 @@
 import Image from "next/image";
-import { Inter } from "next/font/google";
-
-const inter = Inter({ subsets: ["latin"] });
+import { useState } from 'react'
+import { supabase } from './api/supabase'
 
 export default function Home() {
+
+  const [ workoutActivity, setWorkoutActivity ] = useState('')
+  const [ reps, setReps ] = useState(0)
+  const [ sets, setSets ] = useState(0)
+
+  async function addNewWorkoutEntry(){
+    const { data, error } = await supabase
+    .from('users')
+    .insert([
+      { name: workoutActivity, reps: reps, sets: sets }
+    ])
+  }
+
+  function setDate(){
+    let day = new Date().getDate()
+    let month = ''
+    switch(new Date().getMonth()){
+      case 0:
+        month = "January"
+        break
+      case 1:
+        month = "February"
+        break
+      case 2:
+        month = "March"
+        break
+      case 3:
+        month = "April"
+        break
+      case 4:
+        month = "May"
+        break
+      case 5:
+        month = "June"
+        break
+      case 6:
+        month = "July"
+        break
+      case 7:
+        month = "August"
+        break
+      case 8:
+        month = "September"
+        break
+      case 9:
+        month = "October"
+        break
+      case 10:
+        month = "November"
+        break
+      case 11:
+        month = "December"
+        break
+      default:
+        month = ""
+        break
+    }
+
+    let year = new Date().getFullYear()
+
+    return `${month} ${day}, ${year}`
+  }
+  
   return (
-    <main
-      className={`flex min-h-screen flex-col items-center justify-between p-24 ${inter.className}`}
-    >
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">pages/index.js</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+    <div className="px-4 py-8 flex flex-col min-h-screen w-full justify-center items-center">
+      <h1 className="text-4xl xl:text-8xl text-transparent bg-clip-text bg-gradient-to-r from-gray-600 to-gray-900 font-bold">Workout Tracker</h1>
+      <h2 className="mt-6 text-2xl text-gray-500 font-medium">Fitness Tracking For Workout Enthusiasts 💪</h2>
+      <form className="mt-16 border-2 border-gray-800 flex flex-col justify-center rounded-md px-8 py-8 w-full sm:w-2/3 md:w-2/3 lg:w-1/2 xl:w-1/3 2xl:w-1/4">
+        <h3 className="text-4xl font-bold mb-3">Log your workout now</h3>
+        <h4 className="text-gray-500 font-medium mb-5">{setDate()}</h4>
+        <div className="flex flex-col mb-4">
+          <label htmlFor="activity" className="text-lg font-medium mb-2">Workout activity:</label>
+          <input id="activity" type="text" placeholder="Push-ups, Sit-ups..." className="hidden border-2 outline-none border-gray-500 focus:border-gray-800 rounded-md px-3 py-2 text-xl font-bold" required />
+          <select className="rounded-md border-2 border-gray-500 focus:border-gray-800 px-3 py-2 text-xl font-bold">
+            <option value="push-ups" className="bg-gray-700 text-gray-50">---</option>
+            <option value="push-ups" className="bg-gray-700 text-gray-50">Push-ups</option>
+            <option value="sit-ups" className="bg-gray-700 text-gray-50">Sit-ups</option>
+            <option value="squats" className="bg-gray-700 text-gray-50">Squats</option>
+            <option value="bicep-curls" className="bg-gray-700 text-gray-50">Bicep curls</option>
+          </select>
         </div>
-      </div>
-
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-full sm:before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-full sm:after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700/10 after:dark:from-sky-900 after:dark:via-[#0141ff]/40 before:lg:h-[360px]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Discover and deploy boilerplate example Next.js&nbsp;projects.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50 text-balance`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  );
+        <div className="flex flex-col mb-4">
+            <label htmlFor="reps" className="text-lg font-medium mb-2">Reps:</label>
+            <input id="reps" type="number" min={1} className="border-2 border-gray-500 focus:border-gray-800 rounded-md outline-none px-3 py-2 text-xl font-bold" required />
+        </div>
+        <div className="flex flex-col">
+            <label htmlFor="sets" className="text-lg font-medium mb-2">Sets:</label>
+            <input id="sets" type="number" min={1} className="border-2 border-gray-500 focus:border-gray-800 rounded-md outline-none px-3 py-2 text-xl font-bold" required />
+        </div>
+        <button type="button" className="focus:ring ring-offset-2 focus:ring-gray-600 bg-gradient-to-r from-gray-600 to-gray-800 hover:from-gray-800 hover:to-gray-600 transition mt-10 text-xl text-gray-50 rounded-md px-5 py-3 font-bold">Add</button>
+      </form>
+    </div>
+  )
 }
