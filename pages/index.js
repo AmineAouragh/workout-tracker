@@ -33,6 +33,29 @@ export default function Home() {
 
   async function addNewWorkoutEntry(){
     setAddButtonClicked(true)
+    await checkIfUserExists()
+    if (userExists) {
+      let userId = await getUserId()
+      const { data, error } = await supabase
+      .from('activities')
+      .insert([
+        { 
+          name: workoutActivity, 
+          day: workoutDay, 
+          reps: reps, 
+          sets: sets, 
+          duration: duration, 
+          distance: distance,
+          user_id: userId
+        }
+      ])
+      await fetchActivities(userId)
+      setWorkoutActivity("")
+      setReps(0)
+      setSets(0)
+      setDuration(0)
+      setDistance(0) 
+    } else {
       await addNewUser()
       let userId = await getUserId()
       const { data, error } = await supabase
@@ -54,7 +77,7 @@ export default function Home() {
       setSets(0)
       setDuration(0)
       setDistance(0)    
-      
+    } 
   }
 
   async function checkIfUserExists(){
@@ -62,9 +85,9 @@ export default function Home() {
     .from('users')
     .select('id, username, password')
     .eq('password', password)
-    if (users[0].username == username && users[0].password == password){
+    console.log(users[0] != undefined)
+    if (users[0] != undefined){
       setUserExists(true)
-      setUserId(users[0].id)
       return true
     } else {
       setUserExists(false)
@@ -222,7 +245,12 @@ export default function Home() {
         <>
         <hr className="h-2 w-full md:w-3/4 xl:w-1/2 mt-12 md:mt-24" />
         <div className="mt-12 w-full md:w-3/4 xl:w-1/2">
-          <h3 className="text-4xl font-medium mb-3">Today&apos;s Stats 🚀</h3>
+          <h3 className="text-4xl md:text-6xl mb-8 md:mb-16 font-medium">Hi, {username} 👋</h3>
+          <div className="flex flex-row justify-between items-center mb-3">
+            <h3 className="text-4xl font-medium">Today&apos;s Stats 🚀</h3>
+            <button type="button" onClick={() => setAddButtonClicked(false)} className="hidden lg:flex rounded-xl px-5 py-3 text-2xl bg-gradient-to-r from-gray-600 to-gray-800 font-bold shadow-xl text-gray-50">+ Add new activity</button>
+            <button type="button" onClick={() => setAddButtonClicked(false)} className="lg:hidden rounded-xl px-5 py-3 text-2xl bg-gradient-to-r from-gray-600 to-gray-800 font-bold shadow-xl text-gray-50">+</button>
+          </div>
           <h4 className="font-medium text-xl text-gray-600">{workoutDay}</h4>
           <div className="grid grid-cols-3 gap-8 mt-12">
             {
@@ -238,7 +266,6 @@ export default function Home() {
             }
           </div>
         </div>
-        <button type="button" onClick={() => setAddButtonClicked(false)} className="mt-24 rounded-xl px-5 py-3 text-2xl bg-gradient-to-r from-gray-600 to-gray-800 font-bold shadow-xl text-gray-50">Add new activity</button>
         </>
       }
       <p className="bottom-2 hidden absolute font-medium text-gray-700">Made by <span className="text-blue-500">@TheAmineAouragh</span></p>
