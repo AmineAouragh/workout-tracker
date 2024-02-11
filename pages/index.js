@@ -27,15 +27,31 @@ export default function Home() {
     .from('activities')
     .select('name, reps, sets, day, duration, distance')
     .eq('user_id', id)
+    .eq('day', workoutDay)
     console.log(activities)
     setActivities(activities)
   }
 
-  async function addNewWorkoutEntry(){
-    setAddButtonClicked(true)
-    await checkIfUserExists()
-    if (userExists) {
-      let userId = await getUserId()
+  async function updateWorkoutActivity(id, new_reps, new_sets){
+    const { data: activities, error } = await supabase
+    .from('activities')
+    .update({
+      reps: new_reps,
+      sets: new_sets
+    })
+    .eq('user_id', id)
+  }
+
+  async function fetchActivityByIdAndUpdate(user_id){
+    let { data: activities, error } = await supabase
+    .from('activities')
+    .select('name, reps, sets, day, user_id')
+    .eq('user_id', user_id)
+    if (activities[0].name == workoutActivity && activities[0].day == workoutDay){
+      //updateWorkoutActivity(user_id, activities[0].reps + reps, activities[0].sets + sets)
+      console.log("Activity already exists and it should be updated")
+    } else {
+      console.log(activities)
       const { data, error } = await supabase
       .from('activities')
       .insert([
@@ -46,15 +62,28 @@ export default function Home() {
           sets: sets, 
           duration: duration, 
           distance: distance,
-          user_id: userId
+          user_id: user_id
         }
       ])
+    }
+  }
+
+  function resetFields(){
+    setReps(0)
+    setDuration(0)
+    setDistance(0)
+    setSets(0)
+    setWorkoutActivity("")
+  }
+
+  async function addNewWorkoutEntry(){
+    setAddButtonClicked(true)
+    let exists = await checkIfUserExists()
+    if (exists) {
+      let userId = await getUserId()
+      await fetchActivityByIdAndUpdate(userId)
       await fetchActivities(userId)
-      setWorkoutActivity("")
-      setReps(0)
-      setSets(0)
-      setDuration(0)
-      setDistance(0) 
+      //resetFields()
     } else {
       await addNewUser()
       let userId = await getUserId()
@@ -72,11 +101,7 @@ export default function Home() {
         }
       ])
       await fetchActivities(userId)
-      setWorkoutActivity("")
-      setReps(0)
-      setSets(0)
-      setDuration(0)
-      setDistance(0)    
+      //resetFields()
     } 
   }
 
@@ -84,15 +109,14 @@ export default function Home() {
     let { data: users, error } = await supabase
     .from('users')
     .select('id, username, password')
-    .eq('password', password)
-    console.log(users[0] != undefined)
-    if (users[0] != undefined){
-      setUserExists(true)
-      return true
-    } else {
-      setUserExists(false)
-      return false
+    let exists = false
+    for (let user of users){
+      if (user.username == username && user.password == password){
+        exists = true
+        break
+      } 
     }
+    return exists
   }
 
   async function addNewUser(){
@@ -169,12 +193,16 @@ export default function Home() {
 
   function handleCreateWorkoutActivity(){
     setCreateButtonClicked(true)
-    setWorkoutActivity("")
   }
 
   useEffect(() => {
     setDate()
   }, [])
+
+  function handleAddNewButton(){
+    setAddButtonClicked(false)
+    resetFields()
+  }
   
   return (
     <>
@@ -243,24 +271,26 @@ export default function Home() {
       {
         addButtonClicked &&
         <>
-        <hr className="h-2 w-full md:w-3/4 xl:w-1/2 mt-12 md:mt-24" />
+        <hr className="h-2 w-full md:w-3/4 xl:w-1/2 mt-12" />
         <div className="mt-12 w-full md:w-3/4 xl:w-1/2">
-          <h3 className="text-4xl md:text-6xl mb-8 md:mb-16 font-medium">Hi, {username} 👋</h3>
-          <div className="flex flex-row justify-between items-center mb-3">
-            <h3 className="text-4xl font-medium">Today&apos;s Stats 🚀</h3>
-            <button type="button" onClick={() => setAddButtonClicked(false)} className="hidden lg:flex rounded-xl px-5 py-3 text-2xl bg-gradient-to-r from-gray-600 to-gray-800 font-bold shadow-xl text-gray-50">+ Add new activity</button>
-            <button type="button" onClick={() => setAddButtonClicked(false)} className="lg:hidden rounded-xl px-5 py-3 text-2xl bg-gradient-to-r from-gray-600 to-gray-800 font-bold shadow-xl text-gray-50">+</button>
+          <h3 className="text-4xl mb-8 font-medium">Hi, {username} 👋</h3>
+          <div className="flex flex-row justify-between items-center mb-4">
+            <h3 className="text-3xl font-medium font-poppins">Today&apos;s Stats 🚀</h3>
+            <button type="button" onClick={handleAddNewButton} className="hidden lg:flex rounded-xl px-5 py-3 text-2xl bg-gradient-to-r hover:from-gray-600 hover:to-gray-800 from-gray-800 to-gray-600 font-bold shadow-xl text-gray-50 font-poppins">+ Add new activity</button>
+            <button type="button" onClick={handleAddNewButton} className="lg:hidden rounded-xl px-5 py-3 text-2xl bg-gradient-to-r from-gray-600 to-gray-800 font-bold shadow-xl text-gray-50">+</button>
           </div>
           <h4 className="font-medium text-xl text-gray-600">{workoutDay}</h4>
-          <div className="grid grid-cols-3 gap-8 mt-12">
+          <div className="grid grid-cols-3 gap-8 mt-6">
             {
               activities.map(
                 activity => (
-                  <div key={activity.id} id={activity.id} className="rounded-lg bg-gradient-to-r shadow-md from-gray-50 to-gray-200 p-4 md:px-8 md:py-8">
-                    <p className="text-2xl lg:text-4xl font-bold text-gray-700">{activity.name} 💪</p>
-                    <p className="text-2xl lg:text-3xl font-bold text-gray-700 mt-2">{activity.reps * activity.sets} reps</p>
-                    <p className="text-md md:text-xl font-medium text-gray-700 mt-2">{activity.reps} X {activity.sets} sets 🔥</p>
+                  <>
+                  <div key={activity.id} id={activity.id} className="rounded-lg bg-gradient-to-r from-gray-50 to-gray-200 p-4 md:px-8 md:py-8">
+                    <p className="text-2xl lg:text-3xl font-bold text-gray-700 font-poppins">{activity.name}</p>
+                    <p className="text-2xl lg:text-3xl font-bold mt-2 font-poppins text-orange-500">{activity.reps} reps 🔥</p>
+                    <p className="text-md md:text-xl font-medium text-gray-700 mt-2">{activity.sets} sets</p>
                   </div>
+                  </>
                 )
               )
             }
