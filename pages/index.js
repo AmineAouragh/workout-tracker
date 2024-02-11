@@ -21,6 +21,7 @@ export default function Home() {
   const [ userUsername, setUserUsername ] = useState('')
   const [ userPass, setUserPass ] = useState('')
   const [ activities, setActivities ] = useState([])
+  const [ loading, setLoading ] = useState(false)
 
   async function fetchActivities(id){
     let { data: activities, error } = await supabase
@@ -78,6 +79,8 @@ export default function Home() {
 
   async function addNewWorkoutEntry(){
     setAddButtonClicked(true)
+    setLoading(true)
+    setTimeout(() => setLoading(false), 3000)
     let exists = await checkIfUserExists()
     if (exists) {
       let userId = await getUserId()
@@ -274,6 +277,8 @@ export default function Home() {
         <hr className="h-2 w-full md:w-3/4 xl:w-1/2 mt-12" />
         <div className="mt-12 w-full md:w-3/4 xl:w-1/2">
           <h3 className="text-4xl mb-8 font-medium">Hi, {username} 👋</h3>
+          { loading == false &&
+          <>
           <div className="flex flex-row justify-between items-center mb-4">
             <h3 className="text-3xl font-medium font-poppins">Today&apos;s Stats 🚀</h3>
             <button type="button" onClick={handleAddNewButton} className="hidden lg:flex rounded-xl px-5 py-3 text-2xl bg-gradient-to-r hover:from-gray-600 hover:to-gray-800 from-gray-800 to-gray-600 font-bold shadow-xl text-gray-50 font-poppins">+ Add new activity</button>
@@ -295,7 +300,16 @@ export default function Home() {
               )
             }
           </div>
+          </>
+         }
+         {
+          loading == true &&
+          <div className="mt-24">
+            <p className="font-medium font-poppins text-2xl">Your workout activities are being updated now.</p>
+          </div>
+         }
         </div>
+          
         </>
       }
       <p className="bottom-2 hidden absolute font-medium text-gray-700">Made by <span className="text-blue-500">@TheAmineAouragh</span></p>
