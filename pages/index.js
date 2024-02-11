@@ -33,26 +33,42 @@ export default function Home() {
     setActivities(activities)
   }
 
-  async function updateWorkoutActivity(id, new_reps, new_sets){
-    const { data: activities, error } = await supabase
-    .from('activities')
-    .update({
-      reps: new_reps,
-      sets: new_sets
-    })
-    .eq('user_id', id)
-  }
+  async function fetchActivityByIdAndUpdate(user_id, reps, sets){
 
-  async function fetchActivityByIdAndUpdate(user_id){
     let { data: activities, error } = await supabase
     .from('activities')
     .select('name, reps, sets, day, user_id')
     .eq('user_id', user_id)
-    if (activities[0].name == workoutActivity && activities[0].day == workoutDay){
-      //updateWorkoutActivity(user_id, activities[0].reps + reps, activities[0].sets + sets)
-      console.log("Activity already exists and it should be updated")
+    .eq('name', workoutActivity)
+    .eq('day', workoutDay)
+
+    if (error) {
+      console.error("Error fetching the existing activities: ", error.message)
+    }
+
+    if (activities.length > 0){
+      console.log(typeof reps)
+      console.log(typeof sets)
+      const new_reps = activities[0].reps + parseInt(reps)
+      const new_sets = activities[0].sets + parseInt(sets)
+
+      const { data, error: updateError } = await supabase
+      .from('activities')
+      .update({
+        reps: new_reps,
+        sets: new_sets
+      })
+      .eq('user_id', user_id)
+      .eq('name', workoutActivity)
+      .eq('day', workoutDay)
+
+      if (updateError){
+        console.error("Error updating activity: ", updateError.message)
+      } else {
+        console.log("Activity updated successfully!")
+      }
+
     } else {
-      console.log(activities)
       const { data, error } = await supabase
       .from('activities')
       .insert([
@@ -84,7 +100,7 @@ export default function Home() {
     let exists = await checkIfUserExists()
     if (exists) {
       let userId = await getUserId()
-      await fetchActivityByIdAndUpdate(userId)
+      await fetchActivityByIdAndUpdate(userId, reps, sets)
       await fetchActivities(userId)
       //resetFields()
     } else {
