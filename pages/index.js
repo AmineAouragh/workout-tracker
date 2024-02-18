@@ -306,6 +306,7 @@ export default function Home() {
         <button type="button" onClick={addNewWorkoutEntry} className="focus:ring ring-offset-2 focus:ring-gray-600 bg-gradient-to-r from-gray-600 to-gray-800 hover:from-gray-800 hover:to-gray-600 transition mt-6 text-xl text-gray-50 rounded-md px-5 py-3 font-bold">Add</button>
       </form>
       <form className={`mt-10 border-4 border-gray-500 flex flex-col justify-center rounded-md px-8 py-8 w-full sm:w-2/3 md:w-2/3 lg:w-1/2 xl:w-1/3 2xl:w-1/4 ${loginButtonClicked ? "hidden" : ""} ${!showLogin ? "hidden" : ""}`}>
+        <p className="text-center text-2xl font-medium font-poppins mb-8">Log In</p>
         <div className={`flex flex-col mb-3`}>
           <label htmlFor="username" className="text-lg font-medium mb-2">Username:</label>
           <input id="username" value={username} onChange={e => setUsername(e.target.value)} type="text" className="font-poppins text-gray-700 border-4 border-gray-700 focus:shadow-lg focus:border-gray-800 rounded-xl outline-none px-3 py-2 text-xl font-bold" required />
@@ -314,6 +315,7 @@ export default function Home() {
           <label htmlFor="password" className="text-lg font-medium mb-2">Password:</label>
           <input id="password" value={password} onChange={e => setPassword(e.target.value)} type="password" className="font-poppins text-gray-700 border-4 border-gray-700 focus:shadow-lg focus:border-gray-800 rounded-xl outline-none px-3 py-2 text-xl font-bold" required />
         </div>
+        <button type="button" className="bg-gray-700 mt-8 text-2xl px-5 py-4 rounded-lg text-gray-50">Login</button>
       </form>
       {
         addButtonClicked &&
