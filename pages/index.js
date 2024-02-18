@@ -245,8 +245,8 @@ export default function Home() {
       <h1 className="text-4xl xl:text-8xl text-transparent font-poppins bg-clip-text bg-gradient-to-r from-gray-600 to-gray-900 font-bold">Workout Tracker</h1>
       <h2 className="mt-6 text-2xl text-gray-500 font-poppins text-center font-medium">Fitness Tracking For Workout Enthusiasts 💪</h2>
       <p className="mt-12 font-medium text-gray-600 hidden">Coming soon: Weekly Stats, Monthly Stats, Streak Counter</p>
-      <p className="mt-12 font-medium text-gray-600">Coming soon: Workout Activity Distribution</p>
-      <div className={`mt-12 flex flex-col lg:flex-row justify-center lg:justify-between items-center ${showForm ? "hidden" : ""}`}>
+      <p className="mt-12 font-medium text-gray-600 hidden">Coming soon: Workout Activity Distribution</p>
+      <div className={`mt-12 flex flex-col lg:flex-row justify-center lg:justify-between items-center ${showForm || showLogin ? "hidden" : ""}`}>
         <button type="button" onClick={() => setShowForm(true)} className="mb-8 lg:mb-0 lg:mr-16 text-2xl bg-gray-700 font-poppins text-gray-50 px-5 py-4 rounded-lg">Start tracking</button>
         <button type="button" onClick={() => setShowLogin(true)} className="text-2xl font-medium font-poppins px-5 py-4 bg-gray-200 rounded-lg text-gray-800">Log in</button>
       </div>
