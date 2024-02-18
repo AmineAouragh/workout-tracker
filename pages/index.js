@@ -22,6 +22,9 @@ export default function Home() {
   const [ userPass, setUserPass ] = useState('')
   const [ activities, setActivities ] = useState([])
   const [ loading, setLoading ] = useState(false)
+  const [ showForm, setShowForm ] = useState(false)
+  const [ showLogin, setShowLogin ] = useState(false)
+  const [ loginButtonClicked, setLoginButtonClicked ] = useState(false)
 
   async function fetchActivities(id){
     let { data: activities, error } = await supabase
@@ -33,11 +36,11 @@ export default function Home() {
     setActivities(activities)
   }
 
-  async function fetchActivityByIdAndUpdate(user_id, reps, sets){
+  async function fetchActivityByIdAndUpdate(user_id, reps, sets, duration, distance){
 
     let { data: activities, error } = await supabase
     .from('activities')
-    .select('name, reps, sets, day, user_id')
+    .select('name, reps, sets, duration, distance, day, user_id')
     .eq('user_id', user_id)
     .eq('name', workoutActivity)
     .eq('day', workoutDay)
@@ -47,16 +50,19 @@ export default function Home() {
     }
 
     if (activities.length > 0){
-      console.log(typeof reps)
-      console.log(typeof sets)
+      
       const new_reps = activities[0].reps + parseInt(reps)
       const new_sets = activities[0].sets + parseInt(sets)
+      const new_duration = activities[0].duration + parseInt(duration)
+      const new_distance = activities[0].distance + parseInt(distance)
 
       const { data, error: updateError } = await supabase
       .from('activities')
-      .update({
+      .update({ 
         reps: new_reps,
-        sets: new_sets
+        sets: new_sets,
+        duration: new_duration,
+        distance: new_distance
       })
       .eq('user_id', user_id)
       .eq('name', workoutActivity)
@@ -222,6 +228,12 @@ export default function Home() {
     setAddButtonClicked(false)
     resetFields()
   }
+
+  const muscles = {
+    "bicep-curls": "biceps",
+    "push-ups": "pecs, triceps",
+
+  }
   
   return (
     <>
@@ -232,7 +244,13 @@ export default function Home() {
       <div className="px-4 py-8 flex flex-col min-h-screen w-full justify-center items-center">
       <h1 className="text-4xl xl:text-8xl text-transparent font-poppins bg-clip-text bg-gradient-to-r from-gray-600 to-gray-900 font-bold">Workout Tracker</h1>
       <h2 className="mt-6 text-2xl text-gray-500 font-poppins text-center font-medium">Fitness Tracking For Workout Enthusiasts 💪</h2>
-      <form className={`mt-10 border-4 border-gray-500 flex flex-col justify-center rounded-md px-8 py-8 w-full sm:w-2/3 md:w-2/3 lg:w-1/2 xl:w-1/3 2xl:w-1/4 ${addButtonClicked ? "hidden" : ""}`}>
+      <p className="mt-12 font-medium text-gray-600 hidden">Coming soon: Weekly Stats, Monthly Stats, Streak Counter</p>
+      <p className="mt-12 font-medium text-gray-600">Coming soon: Workout Activity Distribution</p>
+      <div className={`mt-12 flex flex-col lg:flex-row justify-center lg:justify-between items-center ${showForm ? "hidden" : ""}`}>
+        <button type="button" onClick={() => setShowForm(true)} className="mb-8 lg:mb-0 lg:mr-16 text-2xl bg-gray-700 font-poppins text-gray-50 px-5 py-4 rounded-lg">Start tracking</button>
+        <button type="button" onClick={() => setShowLogin(true)} className="text-2xl font-medium font-poppins px-5 py-4 bg-gray-200 rounded-lg text-gray-800">Log in</button>
+      </div>
+      <form className={`mt-10 border-4 border-gray-500 flex flex-col justify-center rounded-md px-8 py-8 w-full sm:w-2/3 md:w-2/3 lg:w-1/2 xl:w-1/3 2xl:w-1/4 ${addButtonClicked ? "hidden" : ""} ${!showForm ? "hidden" : ""}`}>
         <h3 className="text-2xl font-bold mb-5 font-poppins">What did you do today?</h3>
         <div className="flex flex-col mb-4">
           <label htmlFor="activity" className="text-lg font-medium mb-2">Workout activity <span className="text-2xl">🏋</span></label>
@@ -287,9 +305,24 @@ export default function Home() {
         </p>
         <button type="button" onClick={addNewWorkoutEntry} className="focus:ring ring-offset-2 focus:ring-gray-600 bg-gradient-to-r from-gray-600 to-gray-800 hover:from-gray-800 hover:to-gray-600 transition mt-6 text-xl text-gray-50 rounded-md px-5 py-3 font-bold">Add</button>
       </form>
+      <form className={`mt-10 border-4 border-gray-500 flex flex-col justify-center rounded-md px-8 py-8 w-full sm:w-2/3 md:w-2/3 lg:w-1/2 xl:w-1/3 2xl:w-1/4 ${loginButtonClicked ? "hidden" : ""} ${!showLogin ? "hidden" : ""}`}>
+        <div className={`flex flex-col mb-3`}>
+          <label htmlFor="username" className="text-lg font-medium mb-2">Username:</label>
+          <input id="username" value={username} onChange={e => setUsername(e.target.value)} type="text" className="font-poppins text-gray-700 border-4 border-gray-700 focus:shadow-lg focus:border-gray-800 rounded-xl outline-none px-3 py-2 text-xl font-bold" required />
+        </div>
+        <div className={`flex flex-col mb-3`}>
+          <label htmlFor="password" className="text-lg font-medium mb-2">Password:</label>
+          <input id="password" value={password} onChange={e => setPassword(e.target.value)} type="password" className="font-poppins text-gray-700 border-4 border-gray-700 focus:shadow-lg focus:border-gray-800 rounded-xl outline-none px-3 py-2 text-xl font-bold" required />
+        </div>
+      </form>
       {
         addButtonClicked &&
         <>
+        <div className="flex flex-row hidden items-center justify-center w-full md:w-3/4 lg:w-1/2 mt-16">
+        <input type="text" id="search" className="font-poppins rounded-xl px-3 py-2 text-2xl font-medium border-4 outline-none border-gray-600 mr-2 w-2/3" placeholder="Search for your workout stats by date" />
+        <button type="button" className="font-poppins rounded-md px-5 py-3 text-2xl text-gray-700 bg-gray-200">Search</button>
+        </div>
+        <p className="text-gray-600 mt-2 hidden">Dates should respect this format: January 22, 2024</p>
         <hr className="h-2 w-full md:w-3/4 xl:w-1/2 mt-12" />
         <div className="mt-12 w-full md:w-3/4 xl:w-1/2">
           <h3 className="text-4xl mb-8 font-medium">Hi, {username} 👋</h3>
@@ -306,7 +339,7 @@ export default function Home() {
               activities.map(
                 activity => (
                   <>
-                  <div key={activity.id} id={activity.id} className="rounded-lg bg-gradient-to-r from-gray-50 to-gray-200 p-4 md:px-8 md:py-8">
+                  <div key={activity.id} id={activity.id} className="rounded-lg border-2 border-gray-600 p-4 md:px-8 md:py-8">
                     <p className="text-2xl lg:text-3xl font-bold text-gray-700 font-poppins">{activity.name}</p>
                     <p className="text-2xl lg:text-3xl font-bold mt-2 font-poppins text-orange-500">{activity.reps} reps 🔥</p>
                     <p className="text-md md:text-xl font-medium text-gray-700 mt-2">{activity.sets} sets</p>
