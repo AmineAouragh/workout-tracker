@@ -100,34 +100,38 @@ export default function Home() {
   }
 
   async function addNewWorkoutEntry(){
-    setAddButtonClicked(true)
-    setLoading(true)
-    setTimeout(() => setLoading(false), 3000)
-    let exists = await checkIfUserExists()
-    if (exists) {
-      let userId = await getUserId()
-      await fetchActivityByIdAndUpdate(userId, reps, sets)
-      await fetchActivities(userId)
+    if (workoutActivity.length > 0 && reps > 0 && username.length > 0 && password.length > 0) {
+      setAddButtonClicked(true)
+      setLoading(true)
+      setTimeout(() => setLoading(false), 3000)
+      let exists = await checkIfUserExists()
+      if (exists) {
+        let userId = await getUserId()
+        await fetchActivityByIdAndUpdate(userId, reps, sets)
+        await fetchActivities(userId)
+        //resetFields()
+      } else {
+        await addNewUser()
+        let userId = await getUserId()
+        const { data, error } = await supabase
+        .from('activities')
+        .insert([
+          { 
+            name: workoutActivity, 
+            day: workoutDay, 
+            reps: reps, 
+            sets: sets, 
+            duration: duration, 
+            distance: distance,
+            user_id: userId
+          }
+        ])
+        await fetchActivities(userId)
+      }
       //resetFields()
     } else {
-      await addNewUser()
-      let userId = await getUserId()
-      const { data, error } = await supabase
-      .from('activities')
-      .insert([
-        { 
-          name: workoutActivity, 
-          day: workoutDay, 
-          reps: reps, 
-          sets: sets, 
-          duration: duration, 
-          distance: distance,
-          user_id: userId
-        }
-      ])
-      await fetchActivities(userId)
-      //resetFields()
-    } 
+      console.log("Enter all fields")
+    }
   }
 
   async function checkIfUserExists(){
@@ -162,9 +166,6 @@ export default function Home() {
     .eq('password', password)
     return users[0].id
   }
-
-  let characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-.?*$&!_'
-  let length = 12
 
   function setDate(){
     let day = new Date().getDate()
@@ -341,7 +342,7 @@ export default function Home() {
               activities.map(
                 activity => (
                   <>
-                  <div key={activity.id} id={activity.id} className="rounded-lg border-2 border-gray-600 p-4 md:px-8 md:py-8">
+                  <div key={activity.id} id={activity.id} className="rounded-lg bg-gradient-to-r from-gray-200 to-gray-100 p-4 md:px-8 md:py-8">
                     <p className="text-2xl lg:text-3xl font-bold text-gray-700 font-poppins">{activity.name}</p>
                     <p className="text-2xl lg:text-3xl font-bold mt-2 font-poppins text-orange-500">{activity.reps} reps 🔥</p>
                     <p className="text-md md:text-xl font-medium text-gray-700 mt-2">{activity.sets} sets</p>
