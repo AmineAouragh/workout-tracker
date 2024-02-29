@@ -100,14 +100,14 @@ export default function Home() {
   }
 
   async function addNewWorkoutEntry(){
-    if (workoutActivity.length > 0 && reps > 0 && username.length > 0 && password.length > 0) {
+    if ((workoutActivity.length > 0 && reps > 0 && username.length > 0 && password.length > 0) || (workoutActivity.length > 0 && duration > 0 && username.length > 0 && password.length > 0)) {
       setAddButtonClicked(true)
       setLoading(true)
       setTimeout(() => setLoading(false), 3000)
       let exists = await checkIfUserExists()
       if (exists) {
         let userId = await getUserId()
-        await fetchActivityByIdAndUpdate(userId, reps, sets)
+        await fetchActivityByIdAndUpdate(userId, reps, sets, duration, distance)
         await fetchActivities(userId)
         //resetFields()
       } else {
@@ -230,6 +230,17 @@ export default function Home() {
     resetFields()
   }
 
+  async function handleShowProfile(){
+    if (username.length > 0 && password.length > 0){
+      let exists = await checkIfUserExists()
+      if (exists) {
+        let userId = await getUserId()
+        await fetchActivities(userId)
+        //resetFields()
+      }
+    }
+  }
+
   const muscles = {
     "bicep-curls": "biceps",
     "push-ups": "pecs, triceps",
@@ -255,12 +266,13 @@ export default function Home() {
         <h3 className="text-2xl font-bold mb-5 font-poppins">What did you do today?</h3>
         <div className="flex flex-col mb-4">
           <label htmlFor="activity" className="text-lg font-medium mb-2">Workout activity <span className="text-2xl">🏋</span></label>
-          <input id="activity" value={workoutActivity} onChange={e => setWorkoutActivity(e.target.value)} type="text" placeholder="Enter a workout activity" className={`border-4 outline-none border-gray-700 focus:shadow-lg focus:border-gray-800 rounded-xl px-3 py-2 text-xl text-gray-700 font-bold ${createButtonClicked ? '' : 'hidden'}`} required />
-          <select value={workoutActivity} onChange={e => setWorkoutActivity(e.target.value)} className={`font-poppins rounded-xl text-gray-700 border-4 border-gray-700 focus:shadow-lg focus:border-gray-800 px-2 py-2 text-xl font-bold ${createButtonClicked ? "hidden" : ""}`}>
+          <input id="activity" name="activity" value={workoutActivity} onChange={e => setWorkoutActivity(e.target.value)} type="text" placeholder="Enter a workout activity" className={`border-4 outline-none border-gray-700 focus:shadow-lg focus:border-gray-800 rounded-xl px-3 py-2 text-xl text-gray-700 font-bold ${createButtonClicked ? '' : 'hidden'}`} required />
+          <select value={workoutActivity} name="workoutActivity" onChange={e => setWorkoutActivity(e.target.value)} className={`font-poppins rounded-xl text-gray-700 border-4 border-gray-700 focus:shadow-lg focus:border-gray-800 px-2 py-2 text-xl font-bold ${createButtonClicked ? "hidden" : ""}`}>
             <option value="" className="bg-gray-700 text-gray-50">---</option>
             <option value="push-ups" className="bg-gray-700 text-gray-50">Push-ups</option>
             <option value="sit-ups" className="bg-gray-700 text-gray-50">Sit-ups</option>
             <option value="squats" className="bg-gray-700 text-gray-50">Squats 🦵</option>
+            <option value="planks" className="bg-gray-700 text-gray-50">Planks</option>
             <option value="bicep-curls" className="bg-gray-700 text-gray-50">Bicep curls 💪</option>
             <option value="skipping-rope" className="bg-gray-700 text-gray-50">Skipping rope ➰</option>
             <option value="running" className="bg-gray-700 text-gray-50">Running 🏃</option>
@@ -268,14 +280,14 @@ export default function Home() {
           </select>
         </div>
         {
-          workoutActivity == "running" || workoutActivity == "cycling"
+          workoutActivity == "running" || workoutActivity == "cycling" || workoutActivity == "planks"
           ?
           <>
             <div className="flex flex-col mb-3">
               <label htmlFor="duration" className="text-lg font-medium mb-2">Duration <span className="text-gray-700">in minutes</span><span className="text-2xl"> ⌛</span></label>
-              <input id="duration" value={duration} onChange={e => setDuration(e.target.value)} type="number" min={1} className="font-poppins text-gray-700 border-4 border-gray-700 focus:shadow-lg focus:border-gray-800 rounded-xl outline-none px-3 py-2 text-xl font-bold" required />
+              <input id="duration" value={duration} onChange={e => setDuration(e.target.value)} type="text" className="font-poppins text-gray-700 border-4 border-gray-700 focus:shadow-lg focus:border-gray-800 rounded-xl outline-none px-3 py-2 text-xl font-bold" required />
             </div>
-            <div className="flex flex-col mb-3">
+            <div className={`flex flex-col mb-3 ${workoutActivity == "planks" ? "hidden" : ""}`}>
               <label htmlFor="distance" className="text-lg font-medium mb-2">Distance <span className="text-gray-700">in meters</span><span className="text-2xl"> 🏃</span> (Optional)</label>
               <input id="distance" value={distance} onChange={e => setDistance(e.target.value)} type="number" min={1} className="font-poppins text-gray-700 border-4 border-gray-700 focus:shadow-lg focus:border-gray-800 rounded-xl outline-none px-3 py-2 text-xl font-bold" />
             </div>
@@ -316,7 +328,7 @@ export default function Home() {
           <label htmlFor="password" className="text-lg font-medium mb-2">Password:</label>
           <input id="password" value={password} onChange={e => setPassword(e.target.value)} type="password" className="font-poppins text-gray-700 border-4 border-gray-700 focus:shadow-lg focus:border-gray-800 rounded-xl outline-none px-3 py-2 text-xl font-bold" required />
         </div>
-        <button type="button" className="bg-gray-700 mt-8 text-2xl px-5 py-4 rounded-lg text-gray-50">Login</button>
+        <button type="button" onClick={() => setShowProfile(true)} className="bg-gray-700 mt-8 text-2xl px-5 py-4 rounded-lg text-gray-50">Login</button>
       </form>
       {
         addButtonClicked &&
@@ -342,9 +354,9 @@ export default function Home() {
               activities.map(
                 activity => (
                   <>
-                  <div key={activity.id} id={activity.id} className="rounded-lg bg-gradient-to-r from-gray-200 to-gray-100 p-4 md:px-8 md:py-8">
+                  <div key={activity.id} id={activity.id} className="rounded-lg bg-gradient-to-r from-gray-50 to-gray-50 p-4 md:px-8 md:py-8">
                     <p className="text-2xl lg:text-3xl font-bold text-gray-700 font-poppins">{activity.name}</p>
-                    <p className="text-2xl lg:text-3xl font-bold mt-2 font-poppins text-orange-500">{activity.reps} reps 🔥</p>
+                    <p className="text-2xl lg:text-3xl font-bold mt-2 font-poppins text-orange-500">{(activity.name == "running" || activity.name == "cycling" || activity.name == "planks") ? activity.duration + " mins" : activity.reps + " reps"}</p>
                     <p className="text-md md:text-xl font-medium text-gray-700 mt-2">{activity.sets} sets</p>
                   </div>
                   </>
