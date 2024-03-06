@@ -26,6 +26,34 @@ export default function Home() {
   const [ showLogin, setShowLogin ] = useState(false)
   const [ loginButtonClicked, setLoginButtonClicked ] = useState(false)
 
+  const TRAINED_MUSCLES_PER_WORKOUT = {
+    "push-ups": {
+       "chest": 1,
+       "triceps": 1,
+       "shoulders": 3
+    },
+    "sit-ups": {
+       "core": 1,
+       "hip flexors": 2,
+       "chest": 3
+    },
+    "planks": {
+       "core": 1,
+       "shoulders": 1,
+       "back": 2
+    },
+    "squats": {
+       "legs": 1,
+       "glutes": 1,
+       "core": 2
+    },
+    "bicep curls": {
+       "biceps": 1,
+       "forearms": 2,
+       "shoulders": 3
+    }
+  }
+
   async function fetchActivities(id){
     let { data: activities, error } = await supabase
     .from('activities')
@@ -53,7 +81,7 @@ export default function Home() {
       
       const new_reps = activities[0].reps + parseInt(reps)
       const new_sets = activities[0].sets + parseInt(sets)
-      const new_duration = activities[0].duration + parseInt(duration)
+      const new_duration = parseInt(activities[0].duration) + parseInt(duration)
       const new_distance = activities[0].distance + parseInt(distance)
 
       const { data, error: updateError } = await supabase
@@ -240,12 +268,6 @@ export default function Home() {
       }
     }
   }
-
-  const muscles = {
-    "bicep-curls": "biceps",
-    "push-ups": "pecs, triceps",
-
-  }
   
   return (
     <>
@@ -354,9 +376,9 @@ export default function Home() {
               activities.map(
                 activity => (
                   <>
-                  <div key={activity.id} id={activity.id} className="rounded-lg bg-gradient-to-r from-gray-50 to-gray-50 p-4 md:px-8 md:py-8">
+                  <div key={activity.id} id={activity.id} className="rounded-lg bg-gradient-to-r from-gray-100 to-gray-50 p-4 md:px-8 md:py-8">
                     <p className="text-2xl lg:text-3xl font-bold text-gray-700 font-poppins">{activity.name}</p>
-                    <p className="text-2xl lg:text-3xl font-bold mt-2 font-poppins text-orange-500">{(activity.name == "running" || activity.name == "cycling" || activity.name == "planks") ? activity.duration + " mins" : activity.reps + " reps"}</p>
+                    <p className="text-2xl font-bold mt-2 font-poppins text-orange-500">{(activity.name == "running" || activity.name == "cycling" || activity.name == "planks") ? activity.duration + " mins" : activity.reps + " reps"}</p>
                     <p className="text-md md:text-xl font-medium text-gray-700 mt-2">{activity.sets} sets</p>
                   </div>
                   </>
