@@ -10,7 +10,7 @@ export default function Home() {
   const [ workoutActivity, setWorkoutActivity ] = useState('')
   const [ workoutDay, setWorkoutDay ] = useState('')
   const [ reps, setReps ] = useState(0)
-  const [ sets, setSets ] = useState(0)
+  const [ sets, setSets ] = useState(1)
   const [ duration, setDuration ] = useState(0)
   const [ distance, setDistance ] = useState(0)
   const [ username, setUsername ] = useState('')
@@ -80,7 +80,7 @@ export default function Home() {
     if (activities.length > 0){
       
       const new_reps = activities[0].reps + parseInt(reps)
-      const new_sets = activities[0].sets + parseInt(sets)
+      const new_sets = activities[0].sets + sets 
       const new_duration = parseInt(activities[0].duration) + parseInt(duration)
       const new_distance = activities[0].distance + parseInt(distance)
 
@@ -123,7 +123,6 @@ export default function Home() {
     setReps(0)
     setDuration(0)
     setDistance(0)
-    setSets(0)
     setWorkoutActivity("")
   }
 
@@ -315,16 +314,10 @@ export default function Home() {
             </div>
           </>
           :
-          <div className="flex flex-row justify-between">
-            <div className="flex flex-col mb-3 w-48">
+            <div className="flex flex-col mb-3">
               <label htmlFor="reps" className="text-lg font-medium mb-2">Reps:</label>
               <input id="reps" value={reps} onChange={e => setReps(e.target.value)} type="number" min={1} className="font-poppins text-gray-700 border-4 border-gray-700 focus:shadow-lg focus:border-gray-800 rounded-xl outline-none px-3 py-2 text-xl font-bold" required />
             </div>
-            <div className="flex flex-col mb-3 w-48">
-              <label htmlFor="sets" className="text-lg font-medium mb-2">Sets:</label>
-              <input id="sets" value={sets} onChange={e => setSets(e.target.value)} type="number" min={1} className="font-poppins text-gray-700 border-4 border-gray-700 focus:shadow-lg focus:border-gray-800 rounded-xl outline-none px-3 py-2 text-xl font-bold" required />
-            </div>
-          </div>
         }
         <div className={`flex flex-col mb-3`}>
           <label htmlFor="username" className="text-lg font-medium mb-2">Username:</label>
