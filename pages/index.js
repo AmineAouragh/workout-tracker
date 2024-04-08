@@ -24,7 +24,9 @@ export default function Home() {
   const [ loading, setLoading ] = useState(false)
   const [ showForm, setShowForm ] = useState(false)
   const [ showLogin, setShowLogin ] = useState(false)
+  const [ showProfile, setShowProfile ] = useState(false)
   const [ loginButtonClicked, setLoginButtonClicked ] = useState(false)
+  const [ message, setMessage ] = useState('')
 
   const TRAINED_MUSCLES_PER_WORKOUT = {
     "push-ups": {
@@ -261,10 +263,17 @@ export default function Home() {
     if (username.length > 0 && password.length > 0){
       let exists = await checkIfUserExists()
       if (exists) {
+        setShowForm(false)
+        setShowLogin(false)
+        setShowProfile(true)
         let userId = await getUserId()
         await fetchActivities(userId)
         //resetFields()
+      } else {
+        setMessage("Wrong credentials! Try again.")
       }
+    } else {
+      setMessage("Fill out all fields please.")
     }
   }
   
@@ -276,10 +285,10 @@ export default function Home() {
       </Head>
       <div className="px-4 py-8 flex flex-col min-h-screen w-full justify-center items-center">
       <h1 className="text-4xl xl:text-8xl text-transparent font-poppins bg-clip-text bg-gradient-to-r from-gray-600 to-gray-900 font-bold">Workout Tracker</h1>
-      <h2 className="mt-6 text-2xl text-gray-500 font-poppins text-center font-medium">Fitness Tracking For Workout Enthusiasts 💪</h2>
+      <h2 className="mt-12 text-2xl text-gray-500 font-poppins text-center font-medium">Fitness Tracking For Workout Enthusiasts 💪</h2>
       <p className="mt-12 font-medium text-gray-600 hidden">Coming soon: Weekly Stats, Monthly Stats, Streak Counter</p>
       <p className="mt-12 font-medium text-gray-600 hidden">Coming soon: Workout Activity Distribution</p>
-      <div className={`mt-12 flex flex-col lg:flex-row justify-center lg:justify-between items-center ${showForm || showLogin ? "hidden" : ""}`}>
+      <div className={`mt-12 flex flex-col lg:flex-row justify-center lg:justify-between items-center ${showForm || showLogin || showProfile ? "hidden" : ""}`}>
         <button type="button" onClick={() => setShowForm(true)} className="mb-8 lg:mb-0 lg:mr-16 text-2xl bg-gray-700 font-poppins text-gray-50 px-5 py-4 rounded-lg">Start tracking</button>
         <button type="button" onClick={() => setShowLogin(true)} className="text-2xl font-medium font-poppins px-5 py-4 bg-gray-200 rounded-lg text-gray-800">Log in</button>
       </div>
@@ -337,16 +346,18 @@ export default function Home() {
         <p className="text-center text-2xl font-medium font-poppins mb-8">Log In</p>
         <div className={`flex flex-col mb-3`}>
           <label htmlFor="username" className="text-lg font-medium mb-2">Username:</label>
-          <input id="username" value={username} onChange={e => setUsername(e.target.value)} type="text" className="font-poppins text-gray-700 border-4 border-gray-700 focus:shadow-lg focus:border-gray-800 rounded-xl outline-none px-3 py-2 text-xl font-bold" required />
+          <input id="username" value={username} onChange={e => setUsername(e.target.value)} type="text" className={`font-poppins text-gray-700 border-4 border-gray-700 focus:shadow-lg focus:border-gray-800 rounded-xl outline-none px-3 py-2 text-xl font-bold ${message.length > 0 && "border-red-400"}`} required />
         </div>
         <div className={`flex flex-col mb-3`}>
           <label htmlFor="password" className="text-lg font-medium mb-2">Password:</label>
-          <input id="password" value={password} onChange={e => setPassword(e.target.value)} type="password" className="font-poppins text-gray-700 border-4 border-gray-700 focus:shadow-lg focus:border-gray-800 rounded-xl outline-none px-3 py-2 text-xl font-bold" required />
+          <input id="password" value={password} onChange={e => setPassword(e.target.value)} type="password" className={`font-poppins text-gray-700 border-4 border-gray-700 focus:shadow-lg focus:border-gray-800 rounded-xl outline-none px-3 py-2 text-xl font-bold ${message.length > 0 && "border-red-400"}`} required />
         </div>
-        <button type="button" onClick={() => setShowProfile(true)} className="bg-gray-700 mt-8 text-2xl px-5 py-4 rounded-lg text-gray-50">Login</button>
+        <p className="font-semibold text-red-400">{message}</p>
+        <button type="button" onClick={handleShowProfile} className="bg-gray-700 mt-8 text-2xl px-5 py-4 rounded-lg text-gray-50 font-poppins">Login</button>
       </form>
+     
       {
-        addButtonClicked &&
+        (addButtonClicked || showProfile) &&
         <>
         <div className="flex flex-row hidden items-center justify-center w-full md:w-3/4 lg:w-1/2 mt-16">
         <input type="text" id="search" className="font-poppins rounded-xl px-3 py-2 text-2xl font-medium border-4 outline-none border-gray-600 mr-2 w-2/3" placeholder="Search for your workout stats by date" />
