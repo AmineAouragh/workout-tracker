@@ -2,8 +2,6 @@ import Image from "next/image";
 import { useState, useEffect } from 'react'
 import { supabase } from './api/supabase'
 import Head from 'next/head'
-import { create } from "domain";
-import { userInfo } from "os";
 
 export default function Home() {
 
@@ -17,9 +15,6 @@ export default function Home() {
   const [ password, setPassword ] = useState('')
   const [ createButtonClicked, setCreateButtonClicked ] = useState(false)
   const [ addButtonClicked, setAddButtonClicked ] = useState(false)
-  const [ userExists, setUserExists ] = useState(false)
-  const [ userUsername, setUserUsername ] = useState('')
-  const [ userPass, setUserPass ] = useState('')
   const [ activities, setActivities ] = useState([])
   const [ loading, setLoading ] = useState(false)
   const [ showForm, setShowForm ] = useState(false)
@@ -27,6 +22,8 @@ export default function Home() {
   const [ showProfile, setShowProfile ] = useState(false)
   const [ loginButtonClicked, setLoginButtonClicked ] = useState(false)
   const [ message, setMessage ] = useState('')
+  const [ statsDay, setStatsDay ] = useState('')
+  const [ totalReps, setTotalReps ] = useState(0)
 
   const TRAINED_MUSCLES_PER_WORKOUT = {
     "push-ups": {
@@ -64,6 +61,12 @@ export default function Home() {
     .eq('day', workoutDay)
     console.log(activities)
     setActivities(activities)
+    let total_reps = totalReps
+    for (let activity of activities){
+      total_reps += activity.reps
+    }
+    setTotalReps(total_reps)
+    console.log(total_reps)
   }
 
   async function fetchActivityByIdAndUpdate(user_id, reps, sets, duration, distance){
@@ -119,6 +122,24 @@ export default function Home() {
         }
       ])
     }
+  }
+
+  async function fetchStats(){
+    let user_id = await getUserId()
+    const { data: activities, error } = await supabase
+    .from('activities')
+    .select('name, reps, sets, day')
+    .eq('user_id', user_id)
+    .eq('day', statsDay)
+    console.log(activities)
+    setWorkoutDay(activities[0].day)
+    setActivities(activities)
+    let total_reps = 0
+    for (let activity of activities){
+      total_reps += activity.reps
+    }
+    setTotalReps(total_reps)
+    console.log(total_reps)
   }
 
   function resetFields(){
@@ -256,6 +277,7 @@ export default function Home() {
 
   function handleAddNewButton(){
     setAddButtonClicked(false)
+    setShowForm(true)
     resetFields()
   }
 
@@ -283,11 +305,11 @@ export default function Home() {
             <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500&family=Rubik+Doodle+Shadow&display=swap" rel="stylesheet" />
             <title>Workout Tracker</title>
       </Head>
-      <div className="px-4 py-8 flex flex-col min-h-screen w-full justify-center items-center">
+      <div className="py-8 flex flex-col min-h-screen w-full justify-center items-center">
       <h1 className="text-4xl xl:text-8xl text-transparent font-poppins bg-clip-text bg-gradient-to-r from-gray-600 to-gray-900 font-bold">Workout Tracker</h1>
       <h2 className="mt-12 text-2xl text-gray-500 font-poppins text-center font-medium">Fitness Tracking For Workout Enthusiasts 💪</h2>
-      <p className="mt-12 font-medium text-gray-600 hidden">Coming soon: Weekly Stats, Monthly Stats, Streak Counter</p>
-      <p className="mt-12 font-medium text-gray-600 hidden">Coming soon: Workout Activity Distribution</p>
+      <p className="mt-12 font-medium text-green-600 hidden">Coming soon: Weekly Stats, Monthly Stats, Streak Counter</p>
+      <p className="mt-12 font-medium text-gray-50 text-center px-2 bg-green-600 hidden">Coming soon: Workout Activity Distribution</p>
       <div className={`mt-12 flex flex-col lg:flex-row justify-center lg:justify-between items-center ${showForm || showLogin || showProfile ? "hidden" : ""}`}>
         <button type="button" onClick={() => setShowForm(true)} className="mb-8 lg:mb-0 lg:mr-16 text-2xl bg-gray-700 font-poppins text-gray-50 px-5 py-4 rounded-lg">Start tracking</button>
         <button type="button" onClick={() => setShowLogin(true)} className="text-2xl font-medium font-poppins px-5 py-4 bg-gray-200 rounded-lg text-gray-800">Log in</button>
@@ -359,22 +381,22 @@ export default function Home() {
       {
         (addButtonClicked || showProfile) &&
         <>
-        <div className="flex flex-row hidden items-center justify-center w-full md:w-3/4 lg:w-1/2 mt-16">
-        <input type="text" id="search" className="font-poppins rounded-xl px-3 py-2 text-2xl font-medium border-4 outline-none border-gray-600 mr-2 w-2/3" placeholder="Search for your workout stats by date" />
-        <button type="button" className="font-poppins rounded-md px-5 py-3 text-2xl text-gray-700 bg-gray-200">Search</button>
+        <div className="flex hidden flex-row items-center justify-between border-4 border-gray-700 rounded-md w-full md:w-3/4 lg:w-1/3 mt-16">
+        <input type="text" value={statsDay} onChange={e => setStatsDay(e.target.value)} id="search" className="font-poppins rounded-xl px-3 py-2 text-xl font-medium outline-none mr-2 w-3/4" placeholder="Search for your workout stats by date..." />
+        <button type="button" onClick={fetchStats} className="font-poppins px-5 py-3 text-2xl text-gray-700 bg-gray-200 hover:bg-gray-300">🔎</button>
         </div>
-        <p className="text-gray-600 mt-2 hidden">Dates should respect this format: January 22, 2024</p>
+        <p className="text-gray-600 mt-2 hidden">Dates should respect this format: MM DD, YYYY</p>
         <hr className="h-2 w-full md:w-3/4 xl:w-1/2 mt-12" />
         <div className="mt-12 w-full md:w-3/4 xl:w-1/2">
           <h3 className="text-4xl mb-8 font-medium">Hi, {username} 👋</h3>
           { loading == false &&
           <>
           <div className="flex flex-row justify-between items-center mb-4">
-            <h3 className="text-3xl font-medium font-poppins">Today&apos;s Stats 🚀</h3>
+            <h3 className="text-xl font-medium font-poppins">Today&apos;s Stats 🚀</h3>
             <button type="button" onClick={handleAddNewButton} className="hidden lg:flex rounded-xl px-5 py-3 text-2xl bg-gradient-to-r hover:from-gray-600 hover:to-gray-800 from-gray-800 to-gray-600 font-bold shadow-xl text-gray-50 font-poppins">+ Add new activity</button>
             <button type="button" onClick={handleAddNewButton} className="lg:hidden rounded-xl px-5 py-3 text-2xl bg-gradient-to-r from-gray-600 to-gray-800 font-bold shadow-xl text-gray-50">+</button>
           </div>
-          <h4 className="font-medium text-xl text-gray-600">{workoutDay}</h4>
+          <h4 className="font-medium text-lg text-gray-600">{workoutDay}</h4>
           <div className="grid grid-cols-3 gap-8 mt-6">
             {
               activities.map(
