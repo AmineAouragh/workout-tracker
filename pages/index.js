@@ -306,13 +306,13 @@ export default function Home() {
             <title>Workout Tracker</title>
       </Head>
       <div className="py-8 flex flex-col min-h-screen w-full justify-center items-center">
-      <h1 className="text-4xl xl:text-8xl text-transparent font-poppins bg-clip-text bg-gradient-to-r from-gray-600 to-gray-900 font-bold">Workout Tracker</h1>
+      <h1 className="text-4xl xl:text-8xl text-transparent font-poppins bg-clip-text bg-gradient-to-r from-gray-600 to-gray-900 font-bold">TrackPro</h1>
       <h2 className="mt-12 text-2xl text-gray-500 font-poppins text-center font-medium">Fitness Tracking For Workout Enthusiasts 💪</h2>
       <p className="mt-12 font-medium text-green-600 hidden">Coming soon: Weekly Stats, Monthly Stats, Streak Counter</p>
       <p className="mt-12 font-medium text-gray-50 text-center px-2 bg-green-600 hidden">Coming soon: Workout Activity Distribution</p>
       <div className={`mt-12 flex flex-col lg:flex-row justify-center lg:justify-between items-center ${showForm || showLogin || showProfile ? "hidden" : ""}`}>
-        <button type="button" onClick={() => setShowForm(true)} className="mb-8 lg:mb-0 lg:mr-16 text-2xl bg-gray-700 font-poppins text-gray-50 px-5 py-4 rounded-lg">Start tracking</button>
-        <button type="button" onClick={() => setShowLogin(true)} className="text-2xl font-medium font-poppins px-5 py-4 bg-gray-200 rounded-lg text-gray-800">Log in</button>
+        <button type="button" onClick={() => setShowForm(true)} className="mb-8 lg:mb-0 text-2xl bg-gray-700 font-poppins text-gray-50 px-5 py-4 rounded-lg">Start tracking</button>
+        <button type="button" onClick={() => setShowLogin(true)} className="text-2xl hidden font-medium font-poppins px-5 py-4 bg-gray-200 rounded-lg text-gray-800">Log in</button>
       </div>
       <form className={`mt-10 border-4 border-gray-500 flex flex-col justify-center rounded-md px-8 py-8 w-full sm:w-2/3 md:w-2/3 lg:w-1/2 xl:w-1/3 2xl:w-1/4 ${addButtonClicked ? "hidden" : ""} ${!showForm ? "hidden" : ""}`}>
         <h3 className="text-2xl font-bold mb-5 font-poppins">What did you do today?</h3>
